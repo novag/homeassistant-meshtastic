@@ -112,7 +112,10 @@ class BluetoothConnection(ClientApiConnection):
                     packet = bytes(packet)
                 if packet == b"":
                     # no more packets available, waiting for notification
-                    await packet_num_queue.get()
+                    try:
+                        await asyncio.wait_for(packet_num_queue.get(), timeout=60)
+                    except asyncio.TimeoutError:
+                        self._logger.debug("_packet_stream: packet wait timeout")
                     continue
 
                 from_radio = mesh_pb2.FromRadio()
